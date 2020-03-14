@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'database.dart';
 
 abstract class BaseAuth {
   Future<String> signIn(String email, String password);
@@ -38,6 +41,8 @@ class Auth implements BaseAuth {
      AuthResult result = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, password: password);
     FirebaseUser user = result.user;
+       await DatabaseService(uid: user.uid).updateUserData('0','new crew member',);
+
     return user.uid;
   }
 
