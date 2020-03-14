@@ -1,22 +1,19 @@
 
 import 'package:flutter/material.dart';
-import 'package:safeguard/auth/app.dart';
-
-
+import 'screens/root_page.dart';
+import './services/authentication.dart';
 
 void main() => runApp(MyApp());
 
+
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-
-        primarySwatch: Colors.lightGreen,
-      ),
-      home: App(),
-    );
+      title: 'Startup Name Generator',
+      home: new RootPage(auth: new Auth())
+      );
   }
+  
 }
