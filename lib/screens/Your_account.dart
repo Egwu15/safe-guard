@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
 
-class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.userId, this.onSignedOut})
+class UpdateDetails extends StatefulWidget {
+  UpdateDetails({Key key, this.auth, this.userId, this.onSignedOut})
       : super(key: key);
 
   final BaseAuth auth;
@@ -12,12 +12,11 @@ class HomePage extends StatefulWidget {
   final String userId;
 
   @override
-  State<StatefulWidget> createState() => new _HomePageState();
+  State<StatefulWidget> createState() => new _UpdateDetailsState();
 }
 
-class _HomePageState extends State<HomePage> {
-
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+class _UpdateDetailsState extends State<UpdateDetails> {
+  // final FirebaseDatabase _database = FirebaseDatabase.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailFilter = new TextEditingController();
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   bool _isIos;
   bool _isLoading;
 
-  _HomePageState() {
+  _UpdateDetailsState() {
     _emailFilter.addListener(_emailListen);
     _passwordFilter.addListener(_passwordListen);
     _resetPasswordEmailFilter.addListener(_resetPasswordEmailListen);
@@ -63,12 +62,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  final _textEditingController = TextEditingController();
+  // final _textEditingController = TextEditingController();
 
-  StreamSubscription<Event> _onTodoAddedSubscription;
-  StreamSubscription<Event> _onTodoChangedSubscription;
+  // StreamSubscription<Event> _onTodoAddedSubscription;
+  // StreamSubscription<Event> _onTodoChangedSubscription;
 
-  Query _todoQuery;
+  // Query _todoQuery;
 
   bool _isEmailVerified = false;
 
@@ -140,14 +139,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  @override
-  void dispose() {
-    _onTodoAddedSubscription.cancel();
-    _onTodoChangedSubscription.cancel();
-    super.dispose();
-  }
-
-  
+  // @override
+  // void dispose() {
+  //   _onTodoAddedSubscription.cancel();
+  //   _onTodoChangedSubscription.cancel();
+  //   super.dispose();
+  // }
 
   _signOut() async {
     try {
@@ -157,7 +154,6 @@ class _HomePageState extends State<HomePage> {
       print(e);
     }
   }
-
 
   Widget _showButtonList() {
     return new Container(
@@ -299,9 +295,7 @@ class _HomePageState extends State<HomePage> {
   _showChangePasswordContainer() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30.0),
-        color: Colors.brown
-      ),
+          borderRadius: BorderRadius.circular(30.0), color: Colors.brown),
       padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
       child: Column(
         children: <Widget>[
