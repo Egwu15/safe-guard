@@ -12,7 +12,7 @@ class SideBarList extends StatelessWidget {
       leading: iconWidget,
       title: Text(
         textTitle,
-        style: TextStyle(color: Colors.lightGreen[800]),
+        style: TextStyle(color: Colors.blue),
       ),
       onTap: onPress,
     );

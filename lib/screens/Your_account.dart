@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:safeguard/screens/login_signup_page.dart';
 import '../services/authentication.dart';
 // import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
@@ -148,8 +150,9 @@ class _UpdateDetailsState extends State<UpdateDetails> {
 
   _signOut() async {
     try {
-      await widget.auth.signOut();
-      widget.onSignedOut();
+      await FirebaseAuth.instance.signOut();
+      // widget.onSignedOut();
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginSignUpPage()));
     } catch (e) {
       print(e);
     }

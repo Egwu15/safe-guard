@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:safeguard/screens/map_page.dart';
+import 'package:safeguard/services/police_check_page.dart';
 import './login_signup_page.dart';
 import '../services/authentication.dart';
 import 'Your_account.dart';
-import 'package:safeguard/screens/complain_page.dart';
+
+import 'package:safeguard/screens/home_page.dart';
 
 
 class RootPage extends StatefulWidget {
@@ -50,12 +53,12 @@ class _RootPageState extends State<RootPage> {
     });
   }
 
-  void _onSignedOut() {
-    setState(() {
-      authStatus = AuthStatus.NOT_LOGGED_IN;
-      _userId = "";
-    });
-  }
+  // void _onSignedOut() {
+  //   setState(() {
+  //     authStatus = AuthStatus.NOT_LOGGED_IN;
+  //     _userId = "";
+  //   });
+  // }
 
   Widget _buildWaitingScreen() {
     return Scaffold(
@@ -65,6 +68,7 @@ class _RootPageState extends State<RootPage> {
       ),
     );
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +84,13 @@ class _RootPageState extends State<RootPage> {
         break;
       case AuthStatus.LOGGED_IN:
         if (_userId.length > 0 && _userId != null) {
-          return new ComplainPage(userId: _userId,);
+          return
+          PoliceCheck(userid: _userId,);
+          // MapPage();
+          //  MyHomePage(uid: _userId,);
+          
+          // new ComplainPage(userId: _userId,);
+
          //TODO:  // 
         //  return new UpdateDetails(
         //     userId: _userId,

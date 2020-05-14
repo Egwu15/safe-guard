@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +8,10 @@ import 'package:safeguard/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as Path;
+import 'package:location/location.dart';
 
 // void main() => runApp(new MyApp());
 
@@ -22,7 +28,7 @@ class ComplainPage extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: new MyHomePage(
-        title: 'Complain',
+        title: 'Report',
         userId: userId,
       ),
     );
@@ -50,17 +56,21 @@ class _MyHomePageState extends State<MyHomePage> {
     this.userId,
   });
   final String title;
-  final  userId;
+  final userId;
 
-  String name;
+  String reportersName;
   String dateOfComplain;
-  String phone;
-  String nim;
-  String email;
+  String ageOfOffender;
+  String addressOfCrime;
+
   String genderOfOffender;
   String offenderName;
   String nameOfOffence;
   String descriptionOfOffence = ''' ''';
+  File _image;
+  String _uploadedFileURL;
+  String longitude;
+  String latitude;
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   List<String> _genders = <String>['', 'Male', 'Female'];
@@ -105,8 +115,74 @@ class _MyHomePageState extends State<MyHomePage> {
     return regex.hasMatch(input);
   }
 
-  
+  Future chooseFileFromCamera() async {
+    await ImagePicker.pickImage(source: ImageSource.camera).then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
+
+  Future chooseFileFromGallery() async {
+    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
+
+  Future uploadFile() async {
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('case/${Path.basename(_image.path)}');
+    StorageUploadTask uploadTask = storageReference.putFile(_image);
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    storageReference.getDownloadURL().then((fileURL) {
+      setState(() {
+        _uploadedFileURL = fileURL;
+      });
+    });
+  }
+
   bool _isLoading = false;
+
+  Location location = new Location();
+
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+
+  void loc() async {
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+    print('shoot');
+
+    _locationData = await location.getLocation();
+    longitude = _locationData.longitude.toString();
+    latitude = _locationData.latitude.toString();
+    print(_locationData);
+  }
+
+  @override
+  void initState() {
+    loc();
+
+    super.initState();
+  }
 
   @override
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -134,11 +210,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     validator: (val) => val.isEmpty ? 'Name is required' : null,
                     onSaved: (String value) {
-                      name = value;
+                      reportersName = value;
                     },
-                  ), TextFormField(
+                  ),
+                  TextFormField(
                     decoration: const InputDecoration(
-                      icon: const Icon(Icons.person,color: Colors.red,),
+                      icon: const Icon(
+                        Icons.person,
+                        color: Colors.red,
+                      ),
                       hintText: 'Offender full name',
                       labelText: "Offenders name",
                     ),
@@ -149,27 +229,48 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   TextFormField(
                     decoration: const InputDecoration(
-                      icon: const Icon(Icons.person,color: Colors.red,),
+                      icon: const Icon(
+                        Icons.person,
+                        color: Colors.red,
+                      ),
                       hintText: 'name of crime',
                       labelText: "name of offence",
                     ),
                     validator: (val) => val.isEmpty ? 'Name is required' : null,
                     onSaved: (String value) {
-                      offenderName = value;
+                      nameOfOffence = value;
                     },
                   ),
                   TextFormField(
                     decoration: const InputDecoration(
-                      icon: const Icon(Icons.person,color: Colors.red,),
+                      icon: const Icon(
+                        Icons.my_location,
+                        color: Colors.red,
+                      ),
+                      hintText: "as accurate as possible",
+                      labelText: 'location of offence',
+                    ),
+                    validator: (val) =>
+                        val.isEmpty ? 'address is required' : null,
+                    onSaved: (String value) {
+                      addressOfCrime = value;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      icon: const Icon(
+                        Icons.vertical_align_center,
+                        color: Colors.red,
+                      ),
                       hintText: 'Description of offence',
                       labelText: "Offence",
                     ),
                     validator: (val) => val.isEmpty ? 'Name is required' : null,
                     onSaved: (String value) {
-                      offenderName = value;
+                      descriptionOfOffence = value;
                     },
                   ),
-                  
+
                   new Row(children: <Widget>[
                     new Expanded(
                         child: new TextFormField(
@@ -193,6 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       }),
                     )
                   ]),
+
                   new TextFormField(
                     decoration: const InputDecoration(
                       icon: const Icon(Icons.timelapse),
@@ -202,28 +304,28 @@ class _MyHomePageState extends State<MyHomePage> {
                     keyboardType: TextInputType.phone,
                     validator: (value) => isValidNumber(value),
                     onSaved: (String value) {
-                      phone = value;
-                    },
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                  new TextFormField(
-                    decoration: const InputDecoration(
-                      icon: const Icon(Icons.person),
-                      hintText: 'Enter N.I.N',
-                      labelText: 'N.IN',
-                    ),
-                    keyboardType: TextInputType.phone,
-                    validator: (value) => isValidNumber(value),
-                    onSaved: (String value) {
-                      nim = value;
+                      ageOfOffender = value;
                     },
                     inputFormatters: [
                       WhitelistingTextInputFormatter.digitsOnly,
                     ],
                   ),
                   // new TextFormField(
+                  //   decoration: const InputDecoration(
+                  //     icon: const Icon(Icons.person),
+                  //     hintText: 'Enter N.I.N',
+                  //     labelText: 'N.IN',
+                  //   ),
+                  //   keyboardType: TextInputType.phone,
+                  //   validator: (value) => isValidNumber(value),
+                  //   onSaved: (String value) {
+                  //     nim = value;
+                  //   },
+                  //   inputFormatters: [
+                  //     WhitelistingTextInputFormatter.digitsOnly,
+                  //   ],
+                  // ),
+                  // // new TextFormField(
                   //   decoration: const InputDecoration(
                   //     icon: const Icon(Icons.email),
                   //     hintText: 'Enter a email address',
@@ -305,22 +407,78 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     },
                     validator: (val) {
-                      return val != "" ? null : 'Please select a gender';
+                      return val != "" ? null : 'Please select a Skin color';
                     },
                     onSaved: (String value) {
                       _colorOfOffender = value;
                     },
                   ),
+                  _image != null
+                      ? Column(
+                          children: <Widget>[
+                            Container(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Image.asset(
+                                _image.path,
+                                height: 150.0,
+                                width: 150.0,
+                                scale: 0.1,
+
+                              ),
+                              width: 150.0,
+
+                            
+                            ),
+                            Text('Image Selected'),
+                            RaisedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _image = null;
+                                });
+                              },
+                              child: Text('clear selection'),
+                            ),
+                            RaisedButton(
+                              onPressed: () {
+                                uploadFile();
+                              },
+                              child: Text('upload image'),
+                            )
+                          ],
+                        )
+                      : Container(
+                          padding: EdgeInsets.only(top: 20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              RaisedButton(
+                                onPressed: () {
+                                  chooseFileFromGallery();
+                                },
+                                child: Text('Gallery'),
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              RaisedButton(
+                                onPressed: () {
+                                  chooseFileFromCamera();
+                                },
+                                child: Text('Camera'),
+                              ),
+                            ],
+                          ),
+                        ),
                   new Container(
-                      padding: const EdgeInsets.only(left: 40.0, top: 20.0),
+                      padding: const EdgeInsets.only(left: 20.0, top: 20.0),
                       child: new RaisedButton(
                         child: const Text('Submit'),
                         onPressed: _submitForm,
                       )),
-               _showCircularProgress(), ],
+                  _showCircularProgress(),
+                ],
               ),
             ),
-            
           ])),
     );
   }
@@ -350,15 +508,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (!form.validate()) {
       showMessage('Form is not valid!  Please review and correct.');
-     
     } else {
       _isLoading = true;
       form.save();
-      ComplainDatabaseService()
-          .updateUserData(widget.userId, name, offenderName, dateOfComplain, phone, nim, email, genderOfOffender, nameOfOffence, descriptionOfOffence,  Timestamp.now(), _colorOfOffender,);
-          // _isLoading = false;
-          print(widget.userId);
-          print('spad');
+      ComplainDatabaseService().updateUserData(
+        widget.userId,
+        reportersName,
+        offenderName,
+        dateOfComplain,
+        ageOfOffender,
+        addressOfCrime,
+        genderOfOffender,
+        nameOfOffence,
+        descriptionOfOffence,
+        Timestamp.now(),
+        _colorOfOffender,
+        _uploadedFileURL,
+        longitude,
+        latitude,
+      );
+      // _isLoading = false;
+      print(widget.userId);
+      print('spad');
     }
   }
 

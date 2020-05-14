@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/authentication.dart';
 
 class LoginSignUpPage extends StatefulWidget {
@@ -101,16 +102,18 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
   @override
   Widget build(BuildContext context) {
     _isIos = Theme.of(context).platform == TargetPlatform.iOS;
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Login'),
-        ),
-        body: Stack(
-          children: <Widget>[
-            _showBody(),
-            _showCircularProgress(),
-          ],
-        ));
+    return WillPopScope(onWillPop: _onWillPop, 
+          child: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('Login'),
+          ),
+          body: Stack(
+            children: <Widget>[
+              _showBody(),
+              _showCircularProgress(),
+            ],
+          )),
+    );
   }
 
   Widget _showCircularProgress(){
@@ -118,6 +121,26 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
       return Center(child: CircularProgressIndicator());
     } return Container(height: 0.0, width: 0.0,);
 
+  }
+
+    Future<bool> _onWillPop() {
+    return showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Are you sure?'),
+        content: new Text('Do you want to exit an App'),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('No'),
+          ),
+          new FlatButton(
+            onPressed: () => SystemNavigator.pop(),
+            child: new Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   void _showVerifyEmailSentDialog() {

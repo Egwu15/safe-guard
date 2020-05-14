@@ -33,12 +33,12 @@ import 'Your_account.dart';
 //   }
 // }
 
-class PolicePage extends StatelessWidget {
-  const PolicePage({Key key, this.title,  this.imageURL})
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key key, this.title, this.uid, this.imageURL})
       : super(key: key);
 
   final String title;
-  
+  final String uid;
   final String imageURL;
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
@@ -58,8 +58,8 @@ class PolicePage extends StatelessWidget {
     String colorOfOffender;
     double latitude;
     double longitiude;
-    String uid;
     String imageUrl;
+    
 
     void submit() {
       address = document['address of crime'];
@@ -67,7 +67,7 @@ class PolicePage extends StatelessWidget {
 
       DateTime d = timeReported.toDate();
       dateReported = DateFormat.yMMMd().add_jm().format(d).toString();
-      
+
       image = document['imageUrl'] ?? image;
       ageOfOffender = document['ageOfOffender'] ?? '';
       colorOfOffender = document['colorOfOffender'] ?? '';
@@ -81,8 +81,6 @@ class PolicePage extends StatelessWidget {
       var longitiudeString = document['longitude'] ?? '';
       latitude = double.parse(latitudeString);
       longitiude = double.parse(longitiudeString);
-      uid = document['userid'] ?? '';
-
     }
 
     return ListTile(
@@ -120,9 +118,7 @@ class PolicePage extends StatelessWidget {
                     ),
                     Text(
                       document['dateOfComplain'].toString() ?? "",
-                    ),
-                    
-                  
+                    )
                   ],
                 ),
               ),
@@ -150,7 +146,6 @@ class PolicePage extends StatelessWidget {
               colorOfOffender: colorOfOffender,
               latitude: latitude,
               longitude: longitiude,
-              userId: uid,
             ),
           ),
         );
@@ -161,14 +156,67 @@ class PolicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ComplainPage(
+                userId: uid,
+              ),
+            ),
+          );
+        },
+        child: Icon(Icons.add),
+      ),
       appBar: AppBar(
-        title: Text('All crimes'),
+        title: Text('Reported cases'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text(imageURL),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: NetworkImage(imageURL), fit: BoxFit.cover),
+              ),
+            ),
+            SideBarList(
+              textTitle: 'Report Case',
+              onPress: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ComplainPage(
+                      userId: uid,
+                    ),
+                  ),
+                );
+              },
+            ),
+            SideBarList(
+              textTitle: 'Account',
+              onPress: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UpdateDetails(
+                            auth: Auth(),
+                            userId: uid,
+                          )),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: StreamBuilder(
           stream: Firestore.instance
               .collection('case_details')
               .document('UpR6MIzxikZQtMv6gAv3wyE4Q7G2')
-              .collection('Reported')
+              .collection('Reported').where('userid', isEqualTo: uid)
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData)
