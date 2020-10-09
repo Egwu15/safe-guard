@@ -33,8 +33,8 @@ import 'Your_account.dart';
 //   }
 // }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key key, this.title, this.uid, this.imageURL})
+class HomePage extends StatelessWidget {
+  const HomePage({Key key, this.title, this.uid, this.imageURL})
       : super(key: key);
 
   final String title;
@@ -58,7 +58,7 @@ class MyHomePage extends StatelessWidget {
     String colorOfOffender;
     double latitude;
     double longitiude;
-    String imageUrl;
+    String video;
     
 
     void submit() {
@@ -67,7 +67,8 @@ class MyHomePage extends StatelessWidget {
 
       DateTime d = timeReported.toDate();
       dateReported = DateFormat.yMMMd().add_jm().format(d).toString();
-
+  
+      video = document['videoUrl'] ?? '';
       image = document['imageUrl'] ?? image;
       ageOfOffender = document['ageOfOffender'] ?? '';
       colorOfOffender = document['colorOfOffender'] ?? '';
@@ -77,9 +78,9 @@ class MyHomePage extends StatelessWidget {
       nameOfOffence = document['nameOfOffence'] ?? '';
       dateOfComplain = document['dateOfComplain'] ?? '';
       descriptionOfOffence = document['descriptionOfOffence'] ?? '';
-      var latitudeString = document['latitude'] ?? '';
-      var longitiudeString = document['longitude'] ?? '';
-      latitude = double.parse(latitudeString);
+      var latitudeString = document['latitude'] ?? "0.0" ;
+      var longitiudeString = document['longitude']  ?? "0.0" ;
+      latitude = double.parse(latitudeString) ;
       longitiude = double.parse(longitiudeString);
     }
 
@@ -135,7 +136,7 @@ class MyHomePage extends StatelessWidget {
             builder: (context) => ReportedCrimeDetails(
               image: image,
               reportedTime: dateReported,
-              address: address,
+              address: address ?? 'unknown',
               dateOfComplain: dateOfComplain,
               descriptionOfOffence: descriptionOfOffence,
               nameOfOffence: nameOfOffence,
@@ -146,6 +147,9 @@ class MyHomePage extends StatelessWidget {
               colorOfOffender: colorOfOffender,
               latitude: latitude,
               longitude: longitiude,
+              userId: uid,
+              video: video,
+
             ),
           ),
         );
@@ -177,7 +181,7 @@ class MyHomePage extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Text(imageURL),
+              child: Text(''),
               decoration: BoxDecoration(
                 image: DecorationImage(
                     image: NetworkImage(imageURL), fit: BoxFit.cover),

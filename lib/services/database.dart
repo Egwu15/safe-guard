@@ -26,6 +26,16 @@ class DatabaseService {
       'address': address,
     });
   }
+
+
+  Future<void> setPoliceAndRegister( bool isPolice, bool isRegistered) async {
+    return await brewCollection.document(uid).setData({
+    
+      'isPolice': isPolice,
+      'isRegistered' : isRegistered,
+      
+    });
+  }
 }
 
 class ComplainDatabaseService {
@@ -51,6 +61,7 @@ class ComplainDatabaseService {
     String imageUrl,
     String longitude,
     String latitude,
+     String videoUrl,
   ) async {
     // return await brewCollection.document(userid).setData({
     return await brewCollection
@@ -71,7 +82,8 @@ class ComplainDatabaseService {
       'decriptionOfOffence': descriptionOfOffence,
       'imageUrl': imageUrl,
       'longitude': longitude,
-      'latitude': latitude
+      'latitude': latitude,
+      'videoUrl': videoUrl
     });
   }
 }

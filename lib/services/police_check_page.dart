@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'colo\\';
 import 'package:safeguard/screens/home_page.dart';
 import 'package:safeguard/screens/police.dart';
 import 'package:safeguard/screens/user_details_page.dart';
@@ -26,19 +27,17 @@ class _PoliceCheckState extends State<PoliceCheck> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData)
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
           if (snapshot.hasData)
-         
-            return  UserDetailsPage(userId: widget.userid);
+            // return  UserDetailsPage(userId: widget.userid);
           if (snapshot.hasData && snapshot.data['isPolice'] == true) {
             return PolicePage( imageURL:snapshot.data['uploadedfileURL'].toString() ,);
             //Todo: police page
           } else if (snapshot.hasData &&
               snapshot.data['isRegistered'] != true) {
-            // return  UserDetailsPage(userId: widget.userid);
+            return  UserDetailsPage(userId: widget.userid);
           } else
-            return MyHomePage(
-              
+            return HomePage(
              imageURL: snapshot.data['uploadedfileURL'].toString() ,
               uid: widget.userid,
             );

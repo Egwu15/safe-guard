@@ -372,7 +372,7 @@ class _UserdetailsState extends State<Userdetails> {
                       //   ),
                   FlatButton(
                       onPressed: () {
-                       Navigator.push(context, MaterialPageRoute(builder: (context)=> WebUpload()));
+                      //  Navigator.push(context, MaterialPageRoute(builder: (context)=> WebUpload()));
                       },
                       child: Text('web upload')),
                   // Center(
@@ -426,6 +426,7 @@ class _UserdetailsState extends State<Userdetails> {
       DatabaseService(uid: widget.userId).updateUserData(name, dob, phone, nim,
           email, gender, isPolice, isRegistered, address, _uploadedFileURL);
       // _isLoading = false;
+      print('submitq');
 
     }
   }

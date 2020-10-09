@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:safeguard/screens/Your_account.dart';
+import 'package:safeguard/screens/home_page.dart';
 import 'package:safeguard/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
@@ -12,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;
 import 'package:location/location.dart';
+import 'package:safeguard/services/police_check_page.dart';
 
 // void main() => runApp(new MyApp());
 
@@ -68,6 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String nameOfOffence;
   String descriptionOfOffence = ''' ''';
   File _image;
+  File _video;
+  String _videoUrl;
   String _uploadedFileURL;
   String longitude;
   String latitude;
@@ -123,6 +127,22 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future chooseVideoFromCamera() async {
+    await ImagePicker.pickVideo(source: ImageSource.camera).then((video) {
+      setState(() {
+        _video = video;
+      });
+    });
+  }
+
+  Future chooseVideoFromGallery() async {
+    await ImagePicker.pickVideo(source: ImageSource.gallery).then((video) {
+      setState(() {
+        _video = video;
+      });
+    });
+  }
+
   Future chooseFileFromGallery() async {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
@@ -131,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future uploadFile() async {
+  Future uploadImage() async {
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
         .child('case/${Path.basename(_image.path)}');
@@ -145,6 +165,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future uploadVideo() async {
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('case/${Path.basename(_video.path)}.mp4');
+    StorageUploadTask uploadTask = storageReference.putFile(_video);
+    await uploadTask.onComplete;
+    print('File Uploaded');
+
+    storageReference.getDownloadURL().then((fileURL) {
+      setState(() {
+        _videoUrl = fileURL;
+      });
+    });
+  }
+
   bool _isLoading = false;
 
   Location location = new Location();
@@ -152,7 +187,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _serviceEnabled;
   PermissionStatus _permissionGranted;
   LocationData _locationData;
-
+  String _imageString = 'submit';
+  String _videoString = 'submit';
   void loc() async {
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
@@ -251,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       labelText: 'location of offence',
                     ),
                     validator: (val) =>
-                        val.isEmpty ? 'address is required' : null,
+                        val.length < 3 ? 'address is required' : null,
                     onSaved: (String value) {
                       addressOfCrime = value;
                     },
@@ -423,13 +459,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                 height: 150.0,
                                 width: 150.0,
                                 scale: 0.1,
-
                               ),
                               width: 150.0,
-
-                            
                             ),
-                            Text('Image Selected'),
+                            Text(_imageString),
                             RaisedButton(
                               onPressed: () {
                                 setState(() {
@@ -440,7 +473,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             RaisedButton(
                               onPressed: () {
-                                uploadFile();
+                                setState(() {
+                                  _imageString = 'uploading';
+                                });
+                                uploadImage().whenComplete(() => setState(() {
+                                      _imageString = "uploaded submit";
+                                    }));
                               },
                               child: Text('upload image'),
                             )
@@ -465,6 +503,52 @@ class _MyHomePageState extends State<MyHomePage> {
                                   chooseFileFromCamera();
                                 },
                                 child: Text('Camera'),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                  _video != null
+                      ? Column(
+                          children: <Widget>[
+                            Text(_videoString),
+                            RaisedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _video = null;
+                                });
+                              },
+                              child: Text('clear selection'),
+                            ),
+                            RaisedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _videoString = 'uploading';
+                                });
+                                uploadVideo().whenComplete(() => setState(() {
+                                      _videoString = "video uploaded";
+                                    }));
+                              },
+                              child: Text('upload Video'),
+                            )
+                          ],
+                        )
+                      : Container(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RaisedButton(
+                                onPressed: () {
+                                  chooseVideoFromGallery();
+                                },
+                                child: Text('Gallery video'),
+                              ),
+                              RaisedButton(
+                                onPressed: () {
+                                  chooseVideoFromCamera();
+                                },
+                                child: Text('cam video'),
                               ),
                             ],
                           ),
@@ -512,24 +596,30 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
       form.save();
       ComplainDatabaseService().updateUserData(
-        widget.userId,
-        reportersName,
-        offenderName,
-        dateOfComplain,
-        ageOfOffender,
-        addressOfCrime,
-        genderOfOffender,
-        nameOfOffence,
-        descriptionOfOffence,
-        Timestamp.now(),
-        _colorOfOffender,
-        _uploadedFileURL,
-        longitude,
-        latitude,
-      );
+          widget.userId,
+          reportersName,
+          offenderName,
+          dateOfComplain,
+          ageOfOffender,
+          addressOfCrime,
+          genderOfOffender,
+          nameOfOffence,
+          descriptionOfOffence,
+          Timestamp.now(),
+          _colorOfOffender,
+          _uploadedFileURL,
+          longitude,
+          latitude,
+          _videoUrl);
       // _isLoading = false;
       print(widget.userId);
       print('spad');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PoliceCheck(
+                    userid: widget.userId,
+                  )));
     }
   }
 

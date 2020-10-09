@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:safeguard/services/database.dart';
 import '../services/authentication.dart';
 
 class LoginSignUpPage extends StatefulWidget {
@@ -50,7 +51,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
           print('Signed in: $userId');
         } else {
           userId = await widget.auth.signUp(_email, _password);
-          widget.auth.sendEmailVerification();
+          widget.auth.sendEmailVerification().then((value) => DatabaseService(uid: userId).setPoliceAndRegister(false, false));
           _showVerifyEmailSentDialog();
           print('Signed up user: $userId');
         }
@@ -209,7 +210,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
         child: CircleAvatar(
           backgroundColor: Colors.transparent,
           radius: 48.0,
-          child: Image.asset('assets/images/logo.png'),
+          child: Image.asset('assets/shield.png'),
         ),
       ),
     );

@@ -17,6 +17,7 @@ class UserProfile extends StatelessWidget {
             .document(uid)
             .snapshots(),
         builder: (context, snapshot) {
+          print(uid);
           if (!snapshot.hasData)
             return Center(child: CircularProgressIndicator());
           else
@@ -27,40 +28,49 @@ class UserProfile extends StatelessWidget {
               body: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SingleChildScrollView(
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-
-Image.network(snapshot.data['uploadedfileURL']),
-SizedBox(height: 20.0,),
-                    Text(
-                      'Name: ' + snapshot.data['name'],
-                      style: style,
-                    ),
-                    SizedBox(height: 10.0),
-                    Text(
-                      'Address: ' + snapshot.data['address'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                    Text(
-                      'Date of birth: ' + snapshot.data['dob'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                    Text(
-                      'Email ' + snapshot.data['email'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                    Text(
-                      'Gender: ' + snapshot.data['gender'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                    Text(
-                      'Nim: ' + snapshot.data['nim'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                    Text(
-                      'Phone number: ' + snapshot.data['phone'] ?? '',
-                      style: style,
-                    ),SizedBox(height: 10.0),
-                  ]),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Image.network(snapshot.data['uploadedfileURL']),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          'Name: ' + snapshot.data['name'],
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Address: ' + snapshot.data['address'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Date of birth: ' + snapshot.data['dob'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Email ' + snapshot.data['email'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Gender: ' + snapshot.data['gender'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Nim: ' + snapshot.data['nim'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                          'Phone number: ' + snapshot.data['phone'] ?? '',
+                          style: style,
+                        ),
+                        SizedBox(height: 10.0),
+                      ]),
                 ),
               ),
             );
